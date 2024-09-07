@@ -4,9 +4,10 @@ public class Main {
     public static void main(String[] args) {
         try {
             BookController controller = new BookController();
+            BookDAO.initializeDatabase();
 
             // Пример: Добавяне на книга
-            Book book = new Book(0, "The Great Gatsby", "F. Scott Fitzgerald", "Fiction", 10.99);
+            Book book = new Book(5, "The Great Gatsby", "F. Scott Fitzgerald", "Fiction", 10.99);
             controller.addBook(book);
 
             // Пример: Извличане на всички книги

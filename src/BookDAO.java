@@ -11,8 +11,32 @@ public class BookDAO {
         this.connection = connection;
     }
 
+    public static void initializeDatabase() {
+        String url = "jdbc:h2:C:/Users/Tedii/Desktop/Books_Project/Books/LibraryDB";
+        String user = "sa";
+        String password = "";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             Statement stmt = conn.createStatement()) {
+
+            // Create table if it does not exist
+            String createTableSQL = "CREATE TABLE IF NOT EXISTS BOOKS (" +
+                    "id IDENTITY PRIMARY KEY, " +
+                    "title VARCHAR(255), " +
+                    "author VARCHAR(255), " +
+                    "genre VARCHAR(255), " +
+                    "price DECIMAL(10, 2))";
+            stmt.execute(createTableSQL);
+
+            System.out.println("Database initialized.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void addBook(Book book) throws SQLException {
-        String query = "INSERT INTO books (title, author, genre, price) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO BOOKS (title, author, genre, price) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, book.getTitle());
             statement.setString(2, book.getAuthor());
@@ -23,7 +47,7 @@ public class BookDAO {
     }
 
     public List<Book> getAllBooks() throws SQLException {
-        String query = "SELECT * FROM books";
+        String query = "SELECT * FROM BOOKS";
         List<Book> books = new ArrayList<>();
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
