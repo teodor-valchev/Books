@@ -13,7 +13,6 @@ public class Book {
         this.author = author;
         this.genre = genre;
         this.price = price;
-
     }
 
     public String getTitle() {
@@ -30,6 +29,20 @@ public class Book {
 
     public double getPrice() {
         return price;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", genre='" + genre + '\'' +
+                ", price=" + price +
+                '}';
     }
 
 }

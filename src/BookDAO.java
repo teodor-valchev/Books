@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookDAO {
-    private Connection connection;
+    private static Connection connection;
 
     public BookDAO(Connection connection) {
         this.connection = connection;
@@ -46,7 +46,7 @@ public class BookDAO {
         }
     }
 
-    public List<Book> getAllBooks() throws SQLException {
+    public static List<Book> getAllBooks() throws SQLException {
         String query = "SELECT * FROM BOOKS";
         List<Book> books = new ArrayList<>();
         try (Statement statement = connection.createStatement();
@@ -63,6 +63,48 @@ public class BookDAO {
             }
         }
         return books;
+    }
+
+    public Book getBookById(int id) {
+        Book book = null;
+        try {
+            String query = "SELECT * FROM BOOKS WHERE id = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                book = new Book(rs.getInt("id"), rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return book;
+    }
+
+    public void updateBook(Book book) {
+        try {
+            String query = "UPDATE BOOKS SET title = ?, author = ?, genre = ?, price = ? WHERE id = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setString(1, book.getTitle());
+            pstmt.setString(2, book.getAuthor());
+            pstmt.setString(3, book.getGenre());
+            pstmt.setDouble(4, book.getPrice());
+            pstmt.setInt(5, book.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteBook(int id) {
+        try {
+            String query = "DELETE FROM BOOKS WHERE id = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // Други методи: updateBook, deleteBook

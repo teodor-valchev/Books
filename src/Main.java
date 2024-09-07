@@ -1,22 +1,9 @@
-import Model.Book;
+import java.sql.SQLException;
 
 public class Main {
-    public static void main(String[] args) {
-        try {
-            BookController controller = new BookController();
-            BookDAO.initializeDatabase();
+    public static void main(String[] args) throws SQLException {
+        BookManagerGUI managerGUI = new BookManagerGUI();
+        managerGUI.setVisible(true);
 
-            // Пример: Добавяне на книга
-            Book book = new Book(5, "The Great Gatsby", "F. Scott Fitzgerald", "Fiction", 10.99);
-            controller.addBook(book);
-
-            // Пример: Извличане на всички книги
-            System.out.println("All books:");
-            controller.getAllBooks().forEach(System.out::println);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
-
     }
