@@ -5,7 +5,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,8 +38,6 @@ public class BookManagerGUI extends JFrame {
         tableModel.addColumn("Author");
         tableModel.addColumn("Genre");
         tableModel.addColumn("Price");
-
-
 
 
         tableModel = new DefaultTableModel(new Object[]{"ID", "Title", "Author", "Genre","Price"}, 0);
@@ -79,7 +80,11 @@ public class BookManagerGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    refreshTable();
+                    List<Book> books = BookDAO.refreshTable();
+
+                    for (Book book : books) {
+                        tableModel.addRow(new Object[]{book.getId(), book.getTitle(), book.getAuthor(), book.getGenre(), book.getPrice()});
+                    }
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -98,11 +103,6 @@ public class BookManagerGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 searchBookAction();
-                try {
-                    refreshTable();
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
             }
         });
 
@@ -136,7 +136,7 @@ public class BookManagerGUI extends JFrame {
         if (!searchText.isEmpty()) {
             try (Connection connection = DbConnection.getConnection()) {
                 BookDAO bookDAO = new BookDAO(connection);
-                List<Book> books = Collections.singletonList(bookDAO.getBookById(Integer.parseInt(searchText)));
+                List<Book> books = bookDAO.getBooksByTitle(searchText);  // Търсене по заглавие
 
                 // Изчистване на таблицата
                 tableModel.setRowCount(0);
@@ -159,6 +159,8 @@ public class BookManagerGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Please enter a title to search.", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
+
 
 
     public void addBookAction() throws SQLException {
@@ -216,7 +218,7 @@ public class BookManagerGUI extends JFrame {
         tableModel.setRowCount(0); // Изчистване на таблицата преди зареждане
         try {
             // Получаване на всички книги
-            List<Book> books = bookDAO.getAllBooks();
+            List<Book> books = BookDAO.getAllBooks();
 
             // Добавяне на всяка книга като ред в таблицата
             for (Book book : books) {

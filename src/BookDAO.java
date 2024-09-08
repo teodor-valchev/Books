@@ -36,6 +36,10 @@ public class BookDAO {
     }
 
     public void addBook(Book book) throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = DbConnection.getConnection();
+        }
+
         String query = "INSERT INTO BOOKS (title, author, genre, price) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, book.getTitle());
@@ -64,6 +68,38 @@ public class BookDAO {
         }
         return books;
     }
+
+    public static List<Book> refreshTable() throws SQLException {
+        // Ensure the connection is still open
+        if (connection == null || connection.isClosed()) {
+            connection = DbConnection.getConnection();
+        }
+
+        String query = "SELECT * FROM BOOKS";  // SQL query to retrieve all books
+        List<Book> books = new ArrayList<>();  // List to hold the retrieved books
+
+        try (PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            // Loop through the result set to get all book entries
+            while (resultSet.next()) {
+                // Create a new book object from each row in the result set
+                Book book = new Book(
+                        resultSet.getString("id"),
+                        resultSet.getString("title"),
+                        resultSet.getString("author"),
+                        resultSet.getString("genre"),
+                        resultSet.getDouble("price")
+                );
+
+                // Add the book to the books list
+                books.add(book);
+            }
+        }
+
+        return books;  // Return the list of books
+    }
+
 
     public Book getBookById(int id) {
         Book book = null;
@@ -109,5 +145,24 @@ public class BookDAO {
         }
     }
 
-    // Други методи: updateBook, deleteBook
+    public List<Book> getBooksByTitle(String title) throws SQLException {
+        List<Book> books = new ArrayList<>();
+        String query = "SELECT * FROM BOOKS WHERE LOWER(title) LIKE ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, "%" + title.toLowerCase() + "%"); // Използваме LOWER() за нечувствителност към главни букви
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Book book = new Book(
+                            rs.getString("id"),
+                            rs.getString("title"),
+                            rs.getString("author"),
+                            rs.getString("genre"),
+                            rs.getDouble("price")
+                    );
+                    books.add(book);
+                }
+            }
+        }
+        return books;
+    }
 }
