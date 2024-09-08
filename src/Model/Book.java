@@ -1,13 +1,13 @@
 package Model;
 
 public class Book {
-    private int id;
+    private String id;
     private String title;
     private String author;
     private String genre;
     private double price;
 
-    public Book(int id, String title, String author, String genre, double price) {
+    public Book(String id, String title, String author, String genre, double price) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -31,7 +31,7 @@ public class Book {
         return price;
     }
 
-    public int getId() {
+    public String getId() {
         return this.id;
     }
 

@@ -53,7 +53,7 @@ public class BookDAO {
              ResultSet resultSet = statement.executeQuery(query)) {
             while (resultSet.next()) {
                 Book book = new Book(
-                        resultSet.getInt("id"),
+                        resultSet.getString("id"),
                         resultSet.getString("title"),
                         resultSet.getString("author"),
                         resultSet.getString("genre"),
@@ -73,7 +73,7 @@ public class BookDAO {
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                book = new Book(rs.getInt("id"), rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"));
+                book = new Book(("id"), rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -83,13 +83,15 @@ public class BookDAO {
 
     public void updateBook(Book book) {
         try {
+
+            Integer bookId = Integer.valueOf(book.getId());
             String query = "UPDATE BOOKS SET title = ?, author = ?, genre = ?, price = ? WHERE id = ?";
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setString(1, book.getTitle());
             pstmt.setString(2, book.getAuthor());
             pstmt.setString(3, book.getGenre());
             pstmt.setDouble(4, book.getPrice());
-            pstmt.setInt(5, book.getId());
+            pstmt.setInt(5, bookId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
