@@ -39,7 +39,7 @@ public class BookManagerGUI extends JFrame {
 
 
 
-        tableModel = new DefaultTableModel(new Object[]{"Title", "Author", "Genre", "Price"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"ID", "Title", "Author", "Genre","Price"}, 0);
         bookTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(bookTable);
         loadAllBooks();
@@ -226,7 +226,7 @@ public class BookManagerGUI extends JFrame {
             e.printStackTrace();
         }
     }
-    
+
     private void refreshTable() throws SQLException {
         // Изчистване на модела на таблицата
         tableModel.setRowCount(0);
