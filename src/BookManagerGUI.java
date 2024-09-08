@@ -68,7 +68,7 @@ public class BookManagerGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     addBookAction();
-                    refreshTable();
+
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -90,12 +90,7 @@ public class BookManagerGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 deleteBookAction();
-                try {
-                    refreshTable();
-                } catch (SQLException ex) {
 
-                    throw new RuntimeException(ex);
-                }
             }
         });
 
@@ -118,13 +113,15 @@ public class BookManagerGUI extends JFrame {
     private void deleteBookAction() {
         int selectedRow = bookTable.getSelectedRow();
         if (selectedRow >= 0) {
-            int bookId = (int) bookTable.getValueAt(selectedRow, 0);
+            String bookIdString = (String) bookTable.getValueAt(selectedRow, 0);
+            int bookId = Integer.parseInt(bookIdString);
 
             try (Connection connection = DbConnection.getConnection()) {
                 BookDAO bookDAO = new BookDAO(connection);
                 bookDAO.deleteBook(bookId);
                 JOptionPane.showMessageDialog(this, "Book deleted successfully!");
                 BookDAO.getAllBooks();
+                refreshTable();
             } catch (SQLException ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Error deleting book.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -205,7 +202,4 @@ public class BookManagerGUI extends JFrame {
             tableModel.addRow(rowData);
         }
     }
-
-
-
 }
