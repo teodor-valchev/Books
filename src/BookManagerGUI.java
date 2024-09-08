@@ -13,11 +13,16 @@ public class BookManagerGUI extends JFrame {
     private JTable bookTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
-    private JButton addButton, deleteButton, searchButton;
+    private JButton addButton, deleteButton, searchButton, refreshButton;
 
+    private Connection connection;
     private BookDAO bookDAO;
 
     public BookManagerGUI() throws SQLException {
+        // Инициализация на връзката
+        connection = DbConnection.getConnection();
+        bookDAO = new BookDAO(connection);
+
         setLayout(new BorderLayout());
 
         // Създаване на таблицата с книги
@@ -31,8 +36,13 @@ public class BookManagerGUI extends JFrame {
         tableModel.addColumn("Genre");
         tableModel.addColumn("Price");
 
-        // Зареждане на всички книги
-        BookDAO.getAllBooks();
+
+
+
+        tableModel = new DefaultTableModel(new Object[]{"Title", "Author", "Genre", "Price"}, 0);
+        bookTable = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(bookTable);
+        loadAllBooks();
 
         // Създаване на панел за бутоните
         JPanel buttonPanel = new JPanel();
@@ -42,6 +52,7 @@ public class BookManagerGUI extends JFrame {
         addButton = new JButton("Add");
         deleteButton = new JButton("Delete");
         searchButton = new JButton("Search");
+        refreshButton = new JButton("Refresh");
 
         // Добавяне на полето за търсене
         searchField = new JTextField(15);
@@ -49,12 +60,29 @@ public class BookManagerGUI extends JFrame {
         buttonPanel.add(searchButton);
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(refreshButton);
 
         // Добавяне на слушатели към бутоните
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addBookAction();
+                try {
+                    addBookAction();
+                    refreshTable();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    refreshTable();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -62,6 +90,12 @@ public class BookManagerGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 deleteBookAction();
+                try {
+                    refreshTable();
+                } catch (SQLException ex) {
+
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -69,6 +103,11 @@ public class BookManagerGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 searchBookAction();
+                try {
+                    refreshTable();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -125,36 +164,28 @@ public class BookManagerGUI extends JFrame {
     }
 
 
-    public void addBookAction() {
-        String searchText = searchField.getText();
+    public void addBookAction() throws SQLException {
+        // Логика за добавяне на нова книга
+        Book newBook = new Book("2", "New Title", "New Author", "New Genre", 15.99); // Примерни данни
+        bookDAO.addBook(newBook);
 
-        if (!searchText.isEmpty()) {
-            try (Connection connection = DbConnection.getConnection()) {
-                BookDAO bookDAO = new BookDAO(connection);
-                List<Book> books = Collections.singletonList(bookDAO.getBookById(Integer.parseInt(searchText)));
+        // Актуализиране на таблицата след добавяне
+        loadAllBooks();
+    }
+    private void loadAllBooks() {
+        tableModel.setRowCount(0); // Изчистване на таблицата преди зареждане
+        try {
+            // Получаване на всички книги
+            List<Book> books = bookDAO.getAllBooks();
 
-                // Изчистване на таблицата
-                tableModel.setRowCount(0);
-
-                // Добавяне на намерените книги в таблицата
-                for (Book book : books) {
-                    tableModel.addRow(new Object[]{
-                            book.getId(),
-                            book.getTitle(),
-                            book.getAuthor(),
-                            book.getGenre(),
-                            book.getPrice()
-                    });
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error searching books.", "Error", JOptionPane.ERROR_MESSAGE);
+            // Добавяне на всяка книга като ред в таблицата
+            for (Book book : books) {
+                tableModel.addRow(new Object[]{book.getId(), book.getTitle(), book.getAuthor(), book.getGenre(), book.getPrice()});
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Please enter a title to search.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
-
 
 
     private void refreshTable() throws SQLException {
