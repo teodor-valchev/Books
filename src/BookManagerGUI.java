@@ -5,34 +5,28 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class BookManagerGUI extends JFrame {
     private JTable bookTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
-    private JButton addButton, deleteButton, searchButton, refreshButton,updateButton;
+    private JButton addButton, deleteButton, searchButton, refreshButton, updateButton;
 
     private Connection connection;
     private BookDAO bookDAO;
 
     public BookManagerGUI() throws SQLException {
-        // Инициализация на връзката
+
         connection = DbConnection.getConnection();
         bookDAO = new BookDAO(connection);
 
         setLayout(new BorderLayout());
 
-        // Създаване на таблицата с книги
         tableModel = new DefaultTableModel();
         bookTable = new JTable(tableModel);
 
-        // Добавяне на колони в таблицата
         tableModel.addColumn("ID");
         tableModel.addColumn("Title");
         tableModel.addColumn("Author");
@@ -40,23 +34,20 @@ public class BookManagerGUI extends JFrame {
         tableModel.addColumn("Price");
 
 
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Title", "Author", "Genre","Price"}, 0);
+        tableModel = new DefaultTableModel(new Object[]{"ID", "Title", "Author", "Genre", "Price"}, 0);
         bookTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(bookTable);
         loadAllBooks();
 
-        // Създаване на панел за бутоните
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-        // Създаване на бутоните
         addButton = new JButton("Add");
         deleteButton = new JButton("Delete");
         searchButton = new JButton("Search");
         refreshButton = new JButton("Refresh");
         updateButton = new JButton("Update");
 
-        // Добавяне на полето за търсене
         searchField = new JTextField(15);
         buttonPanel.add(searchField);
         buttonPanel.add(searchButton);
@@ -65,7 +56,6 @@ public class BookManagerGUI extends JFrame {
         buttonPanel.add(refreshButton);
         buttonPanel.add(updateButton);
 
-        // Добавяне на слушатели към бутоните
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -130,7 +120,7 @@ public class BookManagerGUI extends JFrame {
                 if (updatedBook != null) {
                     try {
                         bookDAO.updateBook(updatedBook);
-                        loadAllBooks();  // Refresh the table
+                        loadAllBooks();
                         JOptionPane.showMessageDialog(this, "Book updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
                     } catch (SQLException e) {
                         e.printStackTrace();
@@ -169,10 +159,8 @@ public class BookManagerGUI extends JFrame {
                 BookDAO bookDAO = new BookDAO(connection);
                 List<Book> books = bookDAO.getBooksByTitle(searchText);  // Търсене по заглавие
 
-                // Изчистване на таблицата
                 tableModel.setRowCount(0);
 
-                // Добавяне на намерените книги в таблицата
                 for (Book book : books) {
                     tableModel.addRow(new Object[]{
                             book.getId(),
@@ -209,18 +197,16 @@ public class BookManagerGUI extends JFrame {
     }
 
     public void addBookAction() throws SQLException {
-        // Създаване на нов прозорец за добавяне на книга
+
         JFrame addBookFrame = new JFrame("Add New Book");
         addBookFrame.setSize(300, 200);
         addBookFrame.setLayout(new GridLayout(5, 2));
 
-        // Създаване на полета за въвеждане на данни
         JTextField titleField = new JTextField();
         JTextField authorField = new JTextField();
         JTextField genreField = new JTextField();
         JTextField priceField = new JTextField();
 
-        // Добавяне на етикети и полета към новия прозорец
         addBookFrame.add(new JLabel("Title:"));
         addBookFrame.add(titleField);
         addBookFrame.add(new JLabel("Author:"));
@@ -230,29 +216,27 @@ public class BookManagerGUI extends JFrame {
         addBookFrame.add(new JLabel("Price:"));
         addBookFrame.add(priceField);
 
-        // Създаване на бутон за потвърждаване
         JButton saveButton = new JButton("Save");
         addBookFrame.add(saveButton);
 
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Вземане на стойностите от полетата за въвеждане
+
                 String title = titleField.getText();
                 String author = authorField.getText();
                 String genre = genreField.getText();
                 double price = Double.parseDouble(priceField.getText());
 
-                // Създаване на нова книга и добавяне в базата данни
                 Book newBook = new Book(null, title, author, genre, price);
                 try {
                     bookDAO.addBook(newBook);
-                    // Актуализиране на таблицата след добавяне
+
                     loadAllBooks();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
-                // Затваряне на прозореца
+
                 addBookFrame.dispose();
             }
         });
@@ -260,12 +244,11 @@ public class BookManagerGUI extends JFrame {
     }
 
     private void loadAllBooks() {
-        tableModel.setRowCount(0); // Изчистване на таблицата преди зареждане
+        tableModel.setRowCount(0);
+
         try {
-            // Получаване на всички книги
             List<Book> books = BookDAO.getAllBooks();
 
-            // Добавяне на всяка книга като ред в таблицата
             for (Book book : books) {
                 tableModel.addRow(new Object[]{book.getId(), book.getTitle(), book.getAuthor(), book.getGenre(), book.getPrice()});
             }
@@ -275,10 +258,8 @@ public class BookManagerGUI extends JFrame {
     }
 
     private void refreshTable() throws SQLException {
-        // Изчистване на модела на таблицата
         tableModel.setRowCount(0);
 
-        // Извличане на книгите от базата данни
         List<Book> books = BookDAO.getAllBooks();
         for (Book book : books) {
             Object[] rowData = {

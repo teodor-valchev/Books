@@ -10,9 +10,6 @@ public class DbConnection {
         try {
             Class.forName("org.h2.Driver");
             try {
-                //  conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/D:\\CarsProjecttt\\CarDB\\h2;USER=sa;PASSWORD=1234");
-                //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/D:\\CarsProjecttt\\CarDB");
-                //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/D:\\CarsProjecttt\\CarDB\\h2;USER=sa;PASSWORD=123");
                 conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/Desktop/Books_Project/Books/LibraryDB", "sa", "");
             } catch (SQLException e) {
                 e.printStackTrace();

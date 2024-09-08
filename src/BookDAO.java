@@ -100,25 +100,6 @@ public class BookDAO {
         return books;  // Return the list of books
     }
 
-
-    public Book getBookById(int id) {
-        Book book = null;
-        try {
-            String query = "SELECT * FROM BOOKS WHERE id = ?";
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                book = new Book(("id"), rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return book;
-    }
-
-
-
     public void deleteBook(int id) {
         try {
             String query = "DELETE FROM BOOKS WHERE id = ?";
@@ -134,7 +115,7 @@ public class BookDAO {
         List<Book> books = new ArrayList<>();
         String query = "SELECT * FROM BOOKS WHERE LOWER(title) LIKE ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, "%" + title.toLowerCase() + "%"); // Използваме LOWER() за нечувствителност към главни букви
+            stmt.setString(1, "%" + title.toLowerCase() + "%");
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Book book = new Book(
@@ -158,7 +139,7 @@ public class BookDAO {
             stmt.setString(2, book.getAuthor());
             stmt.setString(3, book.getGenre());
             stmt.setDouble(4, book.getPrice());
-            stmt.setString(5, book.getId());  // Assuming 'id' is a String. Adjust if it's an Integer.
+            stmt.setString(5, book.getId());
             stmt.executeUpdate();
         }
     }
