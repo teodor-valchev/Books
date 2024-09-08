@@ -16,7 +16,7 @@ public class BookManagerGUI extends JFrame {
     private JTable bookTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
-    private JButton addButton, deleteButton, searchButton, refreshButton;
+    private JButton addButton, deleteButton, searchButton, refreshButton,updateButton;
 
     private Connection connection;
     private BookDAO bookDAO;
@@ -54,6 +54,7 @@ public class BookManagerGUI extends JFrame {
         deleteButton = new JButton("Delete");
         searchButton = new JButton("Search");
         refreshButton = new JButton("Refresh");
+        updateButton = new JButton("Update");
 
         // Добавяне на полето за търсене
         searchField = new JTextField(15);
@@ -62,6 +63,7 @@ public class BookManagerGUI extends JFrame {
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(refreshButton);
+        buttonPanel.add(updateButton);
 
         // Добавяне на слушатели към бутоните
         addButton.addActionListener(new ActionListener() {
@@ -106,8 +108,37 @@ public class BookManagerGUI extends JFrame {
             }
         });
 
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateBookAction();
+            }
+        });
+
         add(new JScrollPane(bookTable), BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void updateBookAction() {
+        Book selectedBook = getSelectedBook();
+        if (selectedBook != null) {
+            UpdateBookDialog dialog = new UpdateBookDialog(this, selectedBook);
+            dialog.setVisible(true);
+
+            if (dialog.isConfirmed()) {
+                Book updatedBook = dialog.getUpdatedBook();
+                if (updatedBook != null) {
+                    try {
+                        bookDAO.updateBook(updatedBook);
+                        loadAllBooks();  // Refresh the table
+                        JOptionPane.showMessageDialog(this, "Book updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(this, "Error updating book.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        }
     }
 
     private void deleteBookAction() {
@@ -161,7 +192,21 @@ public class BookManagerGUI extends JFrame {
     }
 
 
+    private Book getSelectedBook() {
+        int selectedRow = bookTable.getSelectedRow();
+        if (selectedRow != -1) {  // Check if a row is selected
+            String id = (String) tableModel.getValueAt(selectedRow, 0);
+            String title = (String) tableModel.getValueAt(selectedRow, 1);
+            String author = (String) tableModel.getValueAt(selectedRow, 2);
+            String genre = (String) tableModel.getValueAt(selectedRow, 3);
+            Double price = (Double) tableModel.getValueAt(selectedRow, 4);
 
+            return new Book(id, title, author, genre, price);
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a book to update.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return null;
+        }
+    }
 
     public void addBookAction() throws SQLException {
         // Създаване на нов прозорец за добавяне на книга

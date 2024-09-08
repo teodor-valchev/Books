@@ -117,22 +117,7 @@ public class BookDAO {
         return book;
     }
 
-    public void updateBook(Book book) {
-        try {
 
-            Integer bookId = Integer.valueOf(book.getId());
-            String query = "UPDATE BOOKS SET title = ?, author = ?, genre = ?, price = ? WHERE id = ?";
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setString(1, book.getTitle());
-            pstmt.setString(2, book.getAuthor());
-            pstmt.setString(3, book.getGenre());
-            pstmt.setDouble(4, book.getPrice());
-            pstmt.setInt(5, bookId);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void deleteBook(int id) {
         try {
@@ -164,5 +149,17 @@ public class BookDAO {
             }
         }
         return books;
+    }
+
+    public void updateBook(Book book) throws SQLException {
+        String query = "UPDATE BOOKS SET title = ?, author = ?, genre = ?, price = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, book.getTitle());
+            stmt.setString(2, book.getAuthor());
+            stmt.setString(3, book.getGenre());
+            stmt.setDouble(4, book.getPrice());
+            stmt.setString(5, book.getId());  // Assuming 'id' is a String. Adjust if it's an Integer.
+            stmt.executeUpdate();
+        }
     }
 }
