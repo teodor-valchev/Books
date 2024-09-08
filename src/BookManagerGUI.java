@@ -162,13 +162,56 @@ public class BookManagerGUI extends JFrame {
 
 
     public void addBookAction() throws SQLException {
-        // Логика за добавяне на нова книга
-        Book newBook = new Book("2", "New Title", "New Author", "New Genre", 15.99); // Примерни данни
-        bookDAO.addBook(newBook);
+        // Създаване на нов прозорец за добавяне на книга
+        JFrame addBookFrame = new JFrame("Add New Book");
+        addBookFrame.setSize(300, 200);
+        addBookFrame.setLayout(new GridLayout(5, 2));
 
-        // Актуализиране на таблицата след добавяне
-        loadAllBooks();
+        // Създаване на полета за въвеждане на данни
+        JTextField titleField = new JTextField();
+        JTextField authorField = new JTextField();
+        JTextField genreField = new JTextField();
+        JTextField priceField = new JTextField();
+
+        // Добавяне на етикети и полета към новия прозорец
+        addBookFrame.add(new JLabel("Title:"));
+        addBookFrame.add(titleField);
+        addBookFrame.add(new JLabel("Author:"));
+        addBookFrame.add(authorField);
+        addBookFrame.add(new JLabel("Genre:"));
+        addBookFrame.add(genreField);
+        addBookFrame.add(new JLabel("Price:"));
+        addBookFrame.add(priceField);
+
+        // Създаване на бутон за потвърждаване
+        JButton saveButton = new JButton("Save");
+        addBookFrame.add(saveButton);
+
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Вземане на стойностите от полетата за въвеждане
+                String title = titleField.getText();
+                String author = authorField.getText();
+                String genre = genreField.getText();
+                double price = Double.parseDouble(priceField.getText());
+
+                // Създаване на нова книга и добавяне в базата данни
+                Book newBook = new Book(null, title, author, genre, price);
+                try {
+                    bookDAO.addBook(newBook);
+                    // Актуализиране на таблицата след добавяне
+                    loadAllBooks();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                // Затваряне на прозореца
+                addBookFrame.dispose();
+            }
+        });
+        addBookFrame.setVisible(true);
     }
+
     private void loadAllBooks() {
         tableModel.setRowCount(0); // Изчистване на таблицата преди зареждане
         try {
@@ -183,8 +226,7 @@ public class BookManagerGUI extends JFrame {
             e.printStackTrace();
         }
     }
-
-
+    
     private void refreshTable() throws SQLException {
         // Изчистване на модела на таблицата
         tableModel.setRowCount(0);
